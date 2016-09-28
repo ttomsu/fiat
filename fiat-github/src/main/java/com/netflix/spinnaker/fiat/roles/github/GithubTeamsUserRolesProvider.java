@@ -134,6 +134,8 @@ public class GithubTeamsUserRolesProvider implements UserRolesProvider, Initiali
     } catch (RetrofitError e) {
       if (e.getKind() == RetrofitError.Kind.NETWORK) {
         log.error(String.format("Could not find the server %s", master.getBaseUrl()), e);
+      } else if (e.getResponse().getStatus() == 404) {
+        return false;
       } else if (e.getResponse().getStatus() == 401) {
         log.error(String.format("Cannot check if $userName is member of %s teams: Not authorized.",
                                 t.getName()),
