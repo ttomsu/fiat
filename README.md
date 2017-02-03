@@ -1,3 +1,4 @@
+diff
 Spinnaker Auth Service
 ----------------------
 
