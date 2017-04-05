@@ -26,8 +26,9 @@ import java.util.Collections;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(of = "name")
 @NoArgsConstructor
-public class Role implements GroupAccessControlled, Resource, Viewable {
+public class Role implements Resource, Viewable {
 
   private final ResourceType resourceType = ResourceType.ROLE;
   private String name;
@@ -51,11 +52,6 @@ public class Role implements GroupAccessControlled, Resource, Viewable {
     }
     this.name = name.toLowerCase();
     return this;
-  }
-
-  @JsonIgnore
-  public List<String> getRequiredGroupMembership() {
-    return Collections.singletonList(name); // duh.
   }
 
   @JsonIgnore

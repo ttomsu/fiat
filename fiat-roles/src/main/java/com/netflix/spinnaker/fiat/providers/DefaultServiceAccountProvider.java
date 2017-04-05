@@ -16,6 +16,7 @@
 
 package com.netflix.spinnaker.fiat.providers;
 
+import com.netflix.spinnaker.fiat.model.resources.Account;
 import com.netflix.spinnaker.fiat.model.resources.Role;
 import com.netflix.spinnaker.fiat.model.resources.ServiceAccount;
 import com.netflix.spinnaker.fiat.providers.internal.Front50Service;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class DefaultServiceAccountProvider extends BaseProvider implements ServiceAccountProvider {
+public class DefaultServiceAccountProvider extends BaseProvider<ServiceAccount> implements ResourceProvider<ServiceAccount> {
 
   @Autowired
   private Front50Service front50Service;

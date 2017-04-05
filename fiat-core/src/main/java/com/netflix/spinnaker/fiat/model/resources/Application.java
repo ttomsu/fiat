@@ -18,31 +18,32 @@ package com.netflix.spinnaker.fiat.model.resources;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.netflix.spinnaker.fiat.model.Authorization;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Data
-public class Application implements GroupAccessControlled, Resource, Viewable {
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class Application extends BaseAccessControlled<Application> implements Viewable {
   final ResourceType resourceType = ResourceType.APPLICATION;
 
   private String name;
-  private List<String> requiredGroupMembership = new ArrayList<>();
+  private Resource.Permissions permissions = new Resource.Permissions();
+  private Set<Authorization> authorizations = new HashSet<>();
 
-  // Some application configs were saved with `requiredGroupMembership = null`, so this ugly
-  // workaround is needed.
-  public Application setRequiredGroupMembership(List<String> membership) {
-    if (membership == null) {
-      membership = new ArrayList<>();
-    }
-    requiredGroupMembership = membership.stream().map(String::toLowerCase).collect(Collectors.toList());
-    return this;
+  @Override
+  public Application cloneWithoutAuthorizations() {
+    return new Application(name, permissions, new HashSet<>());
   }
 
   @JsonIgnore
@@ -59,9 +60,7 @@ public class Application implements GroupAccessControlled, Resource, Viewable {
 
     public View(Application application) {
       this.name = application.name;
-      this.authorizations = new HashSet<>();
-      this.authorizations.add(Authorization.READ);
-      this.authorizations.add(Authorization.WRITE);
+      this.authorizations = application.authorizations;
     }
   }
 }

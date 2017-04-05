@@ -16,6 +16,7 @@
 
 package com.netflix.spinnaker.fiat.shared
 
+import com.netflix.spinnaker.fiat.model.Authorization
 import com.netflix.spinnaker.fiat.model.UserPermission
 import com.netflix.spinnaker.fiat.model.resources.Application
 import com.netflix.spinnaker.fiat.model.resources.ResourceType
@@ -52,7 +53,6 @@ class FiatPermissionEvaluatorSpec extends Specification {
     !result
 
     when:
-
     result = evaluator.hasPermission(authentication,
                                      resource,
                                      resourceType.name(),
@@ -61,7 +61,20 @@ class FiatPermissionEvaluatorSpec extends Specification {
     then:
     1 * fiatService.getUserPermission("testUser") >> new UserPermission.View(
         new UserPermission(
-            applications: [new Application(name: "abc")]
+            applications: [new Application(name: "abc", authorizations: [/* Missing auth */])]
+        ))
+    !result
+
+    when:
+    result = evaluator.hasPermission(authentication,
+                                     resource,
+                                     resourceType.name(),
+                                     authorization)
+
+    then:
+    1 * fiatService.getUserPermission("testUser") >> new UserPermission.View(
+        new UserPermission(
+            applications: [new Application(name: "abc", authorizations: [Authorization.READ])]
         ))
     result
 

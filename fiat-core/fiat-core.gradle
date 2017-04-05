@@ -9,6 +9,7 @@ dependencies {
   compileOnly spinnaker.dependency("lombok")
 
   compile "org.apache.commons:commons-lang3:3.4"
+  compile spinnaker.dependency("slf4jApi")
 
   testCompile spinnaker.dependency("spockSpring")
   testCompile "commons-io:commons-io:2.5"

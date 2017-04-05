@@ -22,7 +22,7 @@ import com.netflix.spinnaker.fiat.model.resources.Role;
 import java.util.Collection;
 import java.util.Set;
 
-public interface ResourceProvider<R extends Resource> {
+public interface ResourceProvider<R extends Resource.AccessControlled> {
 
   Set<R> getAll() throws ProviderException;
 

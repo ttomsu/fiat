@@ -17,30 +17,41 @@
 package com.netflix.spinnaker.fiat.controllers
 
 import com.netflix.spinnaker.fiat.config.UnrestrictedResourceConfig
+import com.netflix.spinnaker.fiat.model.Authorization
 import com.netflix.spinnaker.fiat.model.UserPermission
 import com.netflix.spinnaker.fiat.model.resources.Account
 import com.netflix.spinnaker.fiat.model.resources.Application
+import com.netflix.spinnaker.fiat.model.resources.Resource
 import com.netflix.spinnaker.fiat.model.resources.Role
 import com.netflix.spinnaker.fiat.model.resources.ServiceAccount
 
 class FiatSystemTestSupport {
+  private static final Authorization R = Authorization.READ
+  private static final Authorization W = Authorization.WRITE
+
   Role roleA = new Role("roleA")
   Role roleB = new Role("roleB").setSource(Role.Source.EXTERNAL)
 
   Application unrestrictedApp = new Application().setName("unrestrictedApp")
+  Application unrestrictedAppWithAuth = unrestrictedApp.cloneWithoutAuthorizations()
+                                                       .setAuthorizations([R, W] as Set)
+
   Application restrictedApp = new Application().setName("restrictedApp")
-                                               .setRequiredGroupMembership([roleA.name])
+                                               .setPermissions(new Resource.Permissions().add(R, roleA.name))
 
   Account unrestrictedAccount = new Account().setName("unrestrictedAcct")
+  Account unrestrictedAccountWithAuth = unrestrictedAccount.cloneWithoutAuthorizations()
+                                                           .setAuthorizations([R, W] as Set)
+
   Account restrictedAccount = new Account().setName("restrictedAcct")
-                                           .setRequiredGroupMembership([roleB.name])
+                                           .setPermissions(new Resource.Permissions().add(R, roleB.name))
 
   ServiceAccount serviceAccount = new ServiceAccount().setName("svcAcct@group.com")
   Role roleServiceAccount = new Role(serviceAccount.requiredGroupMembership.first())
 
   UserPermission unrestrictedUser = new UserPermission().setId(UnrestrictedResourceConfig.UNRESTRICTED_USERNAME)
-                                                        .setAccounts([unrestrictedAccount] as Set)
-                                                        .setApplications([unrestrictedApp] as Set)
+                                                        .setAccounts([unrestrictedAccountWithAuth] as Set)
+                                                        .setApplications([unrestrictedAppWithAuth] as Set)
 
   UserPermission roleAUser = new UserPermission().setId("roleAUser")
                                                  .setRoles([roleA] as Set)

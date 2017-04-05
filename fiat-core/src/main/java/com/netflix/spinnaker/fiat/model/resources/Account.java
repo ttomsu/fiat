@@ -18,30 +18,35 @@ package com.netflix.spinnaker.fiat.model.resources;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.netflix.spinnaker.fiat.model.Authorization;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Data
-public class Account implements GroupAccessControlled, Resource, Viewable {
+@NoArgsConstructor
+// Jackson seems to prefer the all args constructor when available, but passes null for the
+// Resource.Permissions object for 'legacy' objects with requiredGroupMembership.
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class Account extends BaseAccessControlled<Account> implements Viewable {
   final ResourceType resourceType = ResourceType.ACCOUNT;
 
   private String name;
   private String cloudProvider;
-  private List<String> requiredGroupMembership = new ArrayList<>();
+  private Resource.Permissions permissions = new Resource.Permissions();
+  private Set<Authorization> authorizations = new HashSet<>();
 
-  public Account setRequiredGroupMembership(List<String> membership) {
-    if (membership == null) {
-      membership = new ArrayList<>();
-    }
-    requiredGroupMembership = membership.stream().map(String::toLowerCase).collect(Collectors.toList());
-    return this;
+  @Override
+  public Account cloneWithoutAuthorizations() {
+    return new Account(name, cloudProvider, permissions, new HashSet<>());
   }
 
   @JsonIgnore
@@ -58,9 +63,7 @@ public class Account implements GroupAccessControlled, Resource, Viewable {
 
     public View(Account account) {
       this.name = account.name;
-      this.authorizations = new HashSet<>();
-      this.authorizations.add(Authorization.READ);
-      this.authorizations.add(Authorization.WRITE);
+      this.authorizations = account.authorizations;
     }
   }
 }

@@ -17,10 +17,77 @@
 package com.netflix.spinnaker.fiat.model.resources;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.netflix.spinnaker.fiat.model.Authorization;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public interface Resource {
   String getName();
 
   @JsonIgnore
   ResourceType getResourceType();
+
+  /**
+   * Represents Resources that have restrictions on permissions.
+   */
+  interface AccessControlled<R extends Resource.AccessControlled> extends Resource, Authorizable {
+
+    /**
+     * Grant the following Authorizations to this resource. This should not be done to shared
+     * instances of this object. Instead, use the {@link} cloneWithoutAuthorizations} method to get
+     * a new copy first.
+     */
+    R setAuthorizations(Set<Authorization> authorizations);
+
+    /**
+     * @return Implementations should return a modified copy of the object, in order to prevent
+     * inadvertent authorization leaks.
+     */
+    R cloneWithoutAuthorizations();
+
+    Permissions getPermissions();
+  }
+
+  /**
+   * Representation of authorization configuration for a resource. This should be defined on the
+   * account/application config like:
+   *
+   * name: resourceName
+   * permissions:
+   *   read:
+   *   - role1
+   *   - role2
+   *   write:
+   *   - role1
+   *
+   * Group names are trimmed of whitespace and lowercased.
+   */
+  class Permissions extends HashMap<Authorization, List<String>> {
+
+    public Permissions() {
+      super();
+    }
+
+    public Permissions add(Authorization a, String role) {
+      this.computeIfAbsent(a, ignored -> new ArrayList<>()).add(role.trim().toLowerCase());
+      return this;
+    }
+
+    public Set<Authorization> getAuthorizations(List<String> userRoles) {
+      return this.entrySet()
+                 .stream()
+                 .filter(entry -> !Collections.disjoint(entry.getValue(), userRoles))
+                 .map(Entry::getKey)
+                 .collect(Collectors.toSet());
+    }
+
+    public boolean isRestricted() {
+      return this.values().stream().anyMatch(groups -> !groups.isEmpty());
+    }
+  }
 }

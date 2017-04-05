@@ -19,6 +19,7 @@ package com.netflix.spinnaker.fiat.permissions
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.netflix.spinnaker.fiat.config.UnrestrictedResourceConfig
+import com.netflix.spinnaker.fiat.model.Authorization
 import com.netflix.spinnaker.fiat.model.UserPermission
 import com.netflix.spinnaker.fiat.model.resources.Account
 import com.netflix.spinnaker.fiat.model.resources.Application
@@ -77,7 +78,7 @@ class RedisPermissionsRepositorySpec extends Specification {
   def "should put the specified permission in redis"() {
     setup:
     Account account1 = new Account().setName("account")
-    Application app1 = new Application().setName("app")
+    Application app1 = new Application().setName("app").setAuthorizations([Authorization.WRITE] as Set)
     ServiceAccount serviceAccount1 = new ServiceAccount().setName("serviceAccount")
     Role role1 = new Role("role1")
 
@@ -94,11 +95,11 @@ class RedisPermissionsRepositorySpec extends Specification {
     jedis.smembers("unittests:roles:role1") == ["testUser"] as Set
 
     jedis.hgetAll("unittests:permissions:testUser:accounts") ==
-        ['account': '{"name":"account","requiredGroupMembership":[]}']
+        ['account': '{"name":"account","permissions":{},"authorizations":[]}']
     jedis.hgetAll("unittests:permissions:testUser:applications") ==
-        ['app': '{"name":"app","requiredGroupMembership":[]}']
+        ['app': '{"name":"app","permissions":{},"authorizations":["WRITE"]}']
     jedis.hgetAll("unittests:permissions:testUser:service_accounts") ==
-        ['serviceAccount': '{"name":"serviceAccount","memberOf":[]}']
+        ['serviceAccount': '{"name":"serviceAccount","memberOf":[],"permissions":{},"authorizations":[]}']
     jedis.hgetAll("unittests:permissions:testUser:roles") ==
         ['role1': '{"name":"role1"}']
   }

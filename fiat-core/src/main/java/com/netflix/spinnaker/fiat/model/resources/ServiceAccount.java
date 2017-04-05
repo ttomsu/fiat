@@ -17,7 +17,10 @@
 package com.netflix.spinnaker.fiat.model.resources;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.netflix.spinnaker.fiat.model.Authorization;
 import com.netflix.spinnaker.fiat.model.UserPermission;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -25,22 +28,34 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
-public class ServiceAccount implements GroupAccessControlled, Viewable {
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class ServiceAccount extends BaseAccessControlled<ServiceAccount> implements Viewable {
   private final ResourceType resourceType = ResourceType.SERVICE_ACCOUNT;
 
   private String name;
   private List<String> memberOf = new ArrayList<>();
+  private Resource.Permissions permissions = new Resource.Permissions();
+  private Set<Authorization> authorizations = new HashSet<>();
 
   public UserPermission toUserPermission() {
     val roles = memberOf.stream()
                         .map(membership -> new Role(membership).setSource(Role.Source.EXTERNAL))
                         .collect(Collectors.toSet());
     return new UserPermission().setId(name).setRoles(roles);
+  }
+
+  @Override
+  public ServiceAccount cloneWithoutAuthorizations() {
+    return new ServiceAccount(name, memberOf, permissions, new HashSet<>());
   }
 
   @JsonIgnore

@@ -42,9 +42,9 @@ public class UserPermission implements Viewable {
     addResources(Collections.singleton(resource));
   }
 
-  public void addResources(Collection<Resource> resources) {
+  public UserPermission addResources(Collection<Resource> resources) {
     if (resources == null) {
-      return;
+      return this;
     }
 
     resources.forEach(resource -> {
@@ -60,6 +60,8 @@ public class UserPermission implements Viewable {
         throw new IllegalArgumentException("Cannot add unknown resource " + resource);
       }
     });
+
+    return this;
   }
 
   @JsonIgnore
