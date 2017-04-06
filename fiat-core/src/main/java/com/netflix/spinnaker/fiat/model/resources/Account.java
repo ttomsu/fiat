@@ -18,38 +18,26 @@ package com.netflix.spinnaker.fiat.model.resources;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.netflix.spinnaker.fiat.model.Authorization;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Slf4j
 @Data
 @NoArgsConstructor
-// Jackson seems to prefer the all args constructor when available, but passes null for the
-// Permissions object for 'legacy' objects with requiredGroupMembership.
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Account extends BaseAccessControlled<Account> implements Viewable {
+public class Account extends BaseAccessControlled implements Viewable {
   final ResourceType resourceType = ResourceType.ACCOUNT;
 
   private String name;
   private String cloudProvider;
-  private Permissions.Mutable permissions = new Permissions.Mutable();
-  private Set<Authorization> authorizations = new HashSet<>();
-
-  @Override
-  public Account cloneWithoutAuthorizations() {
-    return new Account(name, cloudProvider, permissions, new HashSet<>());
-  }
+  private Permissions permissions = Permissions.EMPTY;
 
   @JsonIgnore
-  public View getView() {
-    return new View(this);
+  public View getView(Set<Role> userRoles) {
+    return new View(this, userRoles);
   }
 
   @Data
@@ -59,9 +47,9 @@ public class Account extends BaseAccessControlled<Account> implements Viewable {
     String name;
     Set<Authorization> authorizations;
 
-    public View(Account account) {
+    public View(Account account, Set<Role> userRoles) {
       this.name = account.name;
-      this.authorizations = account.authorizations;
+      this.authorizations = account.permissions.getAuthorizations(userRoles);
     }
   }
 }

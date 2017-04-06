@@ -53,7 +53,7 @@ class ResourceSpec extends Specification {
 
   def "should compute authorizations correctly"() {
     setup:
-    def p = new Permissions.Mutable()
+    def p = new Permissions.Builder()
     p.add(Authorization.READ, "role1")
 
     expect:
@@ -70,7 +70,7 @@ class ResourceSpec extends Specification {
 
   def "should detect when restricted"() {
     setup:
-    def p = new Permissions.Mutable()
+    def p = new Permissions.Builder()
 
     expect:
     !p.isRestricted()

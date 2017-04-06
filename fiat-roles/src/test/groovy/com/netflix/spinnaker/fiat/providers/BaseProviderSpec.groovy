@@ -42,10 +42,10 @@ class BaseProviderSpec extends Specification {
         .setName("noReqGroups")
     reqGroup1 = new TestResource()
         .setName("reqGroup1")
-        .setPermissions(new Permissions.Mutable().add(R, "group1"))
+        .setPermissions(new Permissions.Builder().add(R, "group1"))
     reqGroup1and2 = new TestResource()
         .setName("reqGroup1and2")
-        .setPermissions(new Permissions.Mutable().add(R, "group1")
+        .setPermissions(new Permissions.Builder().add(R, "group1")
                                                  .add(W, "group2"))
   }
 
@@ -145,7 +145,7 @@ class BaseProviderSpec extends Specification {
     final ResourceType resourceType = ResourceType.APPLICATION // Irrelevant for testing.
     String name
     Set<Authorization> authorizations = new HashSet<>()
-    Permissions.Mutable permissions = new Permissions.Mutable()
+    Permissions.Builder permissions = new Permissions.Builder()
 
     @Override
     TestResource cloneWithoutAuthorizations() {

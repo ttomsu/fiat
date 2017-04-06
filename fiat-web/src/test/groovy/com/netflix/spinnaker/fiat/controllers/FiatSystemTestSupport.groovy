@@ -37,14 +37,14 @@ class FiatSystemTestSupport {
                                                        .setAuthorizations([R, W] as Set)
 
   Application restrictedApp = new Application().setName("restrictedApp")
-                                               .setPermissions(new Permissions.Mutable().add(R, roleA.name))
+                                               .setPermissions(new Permissions.Builder().add(R, roleA.name))
 
   Account unrestrictedAccount = new Account().setName("unrestrictedAcct")
   Account unrestrictedAccountWithAuth = unrestrictedAccount.cloneWithoutAuthorizations()
                                                            .setAuthorizations([R, W] as Set)
 
   Account restrictedAccount = new Account().setName("restrictedAcct")
-                                           .setPermissions(new Permissions.Mutable().add(R, roleB.name))
+                                           .setPermissions(new Permissions.Builder().add(R, roleB.name))
 
   ServiceAccount serviceAccount = new ServiceAccount().setName("svcAcct@group.com")
   Role roleServiceAccount = new Role(serviceAccount.requiredGroupMembership.first())

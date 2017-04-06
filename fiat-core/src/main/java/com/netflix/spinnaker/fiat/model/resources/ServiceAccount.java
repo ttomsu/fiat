@@ -37,13 +37,12 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ServiceAccount extends BaseAccessControlled<ServiceAccount> implements Viewable {
+public class ServiceAccount extends BaseAccessControlled implements Viewable {
   private final ResourceType resourceType = ResourceType.SERVICE_ACCOUNT;
 
   private String name;
   private List<String> memberOf = new ArrayList<>();
-  private Permissions.Mutable permissions = new Permissions.Mutable();
-  private Set<Authorization> authorizations = new HashSet<>();
+  private Permissions permissions = Permissions.EMPTY;
 
   public UserPermission toUserPermission() {
     val roles = memberOf.stream()
@@ -51,12 +50,7 @@ public class ServiceAccount extends BaseAccessControlled<ServiceAccount> impleme
                         .collect(Collectors.toSet());
     return new UserPermission().setId(name).setRoles(roles);
   }
-
-  @Override
-  public ServiceAccount cloneWithoutAuthorizations() {
-    return new ServiceAccount(name, memberOf, permissions, new HashSet<>());
-  }
-
+  
   @JsonIgnore
   public List<String> getRequiredGroupMembership() {
     // There is a potential here for a naming collision where service account
@@ -74,7 +68,7 @@ public class ServiceAccount extends BaseAccessControlled<ServiceAccount> impleme
   }
 
   @JsonIgnore
-  public View getView() {
+  public View getView(Set<Role> ignored) {
     return new View(this);
   }
 

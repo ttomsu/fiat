@@ -37,14 +37,15 @@ class PermissionsSpec extends Specification {
 
   def "should deserialize"() {
     when:
-    Permissions p = mapper.readValue(permissionJson, Permissions.Mutable)
+    Permissions p = mapper.readValue(permissionJson, Permissions)
 
     then:
     p.get(R) == ["foo"]
     p.get(W) == ["bar"]
 
     when:
-    p = mapper.readValue(permissionJson, Permissions.Immutable)
+    Permissions.Builder b = mapper.readValue(permissionJson, Permissions.Builder)
+    p = b.build()
 
     then:
     p.get(R) == ["foo"]
@@ -53,32 +54,25 @@ class PermissionsSpec extends Specification {
 
   def "should serialize"() {
     when:
-    Permissions.Mutable p = new Permissions.Mutable()
-    p.putAll([(R): ["foo"], (W): ["bar"]])
+    Permissions.Builder b = new Permissions.Builder()
+    b.set([(R): ["foo"], (W): ["bar"]])
     
     then:
-    permissionJson ==  mapper.writeValueAsString(p)
-
-    when:
-    Permissions im = p.immutable()
-
-    then:
-    permissionJson == mapper.writeValueAsString(p)
+    permissionJson ==  mapper.writeValueAsString(b.build())
   }
 
   def "test immutability"() {
     setup:
-    Permissions p = new Permissions.Mutable().add(R, "foo").add(W, "bar")
-    
+    Permissions.Builder b = new Permissions.Builder().add(R, "foo").add(W, "bar")
 
     when:
-    p.add(R, "baz")
+    b.add(R, "baz")
 
     then:
-    p.get(R).size() == 2
+    b.permissions.get(R).size() == 2
 
     when:
-    Permissions im = p.immutable()
+    Permissions im = b.build()
     im.get(R).clear()
 
     then:

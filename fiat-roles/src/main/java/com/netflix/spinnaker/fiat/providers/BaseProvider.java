@@ -16,8 +16,6 @@
 
 package com.netflix.spinnaker.fiat.providers;
 
-import com.google.common.collect.Sets;
-import com.netflix.spinnaker.fiat.model.Authorization;
 import com.netflix.spinnaker.fiat.model.resources.Resource;
 import com.netflix.spinnaker.fiat.model.resources.Role;
 import lombok.Data;
@@ -26,8 +24,6 @@ import lombok.Setter;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -70,14 +66,12 @@ public abstract class BaseProvider<R extends Resource.AccessControlled> implemen
 
   @Override
   @SuppressWarnings("unchecked")
-  public Set<R> getAllRestricted(@NonNull Collection<Role> roles) throws ProviderException {
+  public Set<R> getAllRestricted(@NonNull Set<Role> roles) throws ProviderException {
     val groupNames = roles.stream().map(Role::getName).collect(Collectors.toList());
     return (Set<R>) getAll()
         .stream()
-        .map(resource -> resource.cloneWithoutAuthorizations()
-                                 .setAuthorizations(resource.getPermissions()
-                                                            .getAuthorizations(groupNames)))
-        .filter(resource -> !resource.getAuthorizations().isEmpty())
+        .filter(resource -> resource.getPermissions().isRestricted())
+        .filter(resource -> resource.getPermissions().isAuthorized(roles))
         .collect(Collectors.toSet());
 
   }
@@ -88,8 +82,6 @@ public abstract class BaseProvider<R extends Resource.AccessControlled> implemen
     return (Set<R>) getAll()
         .stream()
         .filter(resource -> !resource.getPermissions().isRestricted())
-        .map(resource -> resource.cloneWithoutAuthorizations()
-                                 .setAuthorizations(Sets.newHashSet(Authorization.values())))
         .collect(Collectors.toSet());
   }
 }

@@ -25,28 +25,21 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Slf4j
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Application extends BaseAccessControlled<Application> implements Viewable {
+public class Application extends BaseAccessControlled implements Viewable {
   final ResourceType resourceType = ResourceType.APPLICATION;
 
   private String name;
-  private Permissions.Mutable permissions = new Permissions.Mutable();
-  private Set<Authorization> authorizations = new HashSet<>();
-
-  @Override
-  public Application cloneWithoutAuthorizations() {
-    return new Application(name, permissions, new HashSet<>());
-  }
-
+  private Permissions permissions = Permissions.EMPTY;
+  
   @JsonIgnore
-  public View getView() {
-    return new View(this);
+  public View getView(Set<Role> userRoles) {
+    return new View(this, userRoles);
   }
 
   @Data
@@ -56,9 +49,9 @@ public class Application extends BaseAccessControlled<Application> implements Vi
     String name;
     Set<Authorization> authorizations;
 
-    public View(Application application) {
+    public View(Application application, Set<Role> userRoles) {
       this.name = application.name;
-      this.authorizations = application.authorizations;
+      this.authorizations = application.permissions.getAuthorizations(userRoles);
     }
   }
 }

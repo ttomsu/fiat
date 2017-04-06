@@ -63,7 +63,7 @@ public class DefaultServiceAccountProvider extends BaseProvider<ServiceAccount> 
    * @param roles
    */
   @Override
-  public Set<ServiceAccount> getAllRestricted(@NonNull Collection<Role> roles) {
+  public Set<ServiceAccount> getAllRestricted(@NonNull Set<Role> roles) {
     val groupNames = roles.stream().map(Role::getName).collect(Collectors.toList());
     return getAll()
         .stream()

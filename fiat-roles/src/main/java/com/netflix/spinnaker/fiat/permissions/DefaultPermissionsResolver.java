@@ -169,33 +169,22 @@ public class DefaultPermissionsResolver implements PermissionsResolver {
 
   static class AccessControlLists {
     // This object indexes:
-    // role (group name) -> authorization (read/write) -> resources (account, application, etc)
-    Map<Role, Multimap<Authorization, Resource.AccessControlled>> acl = new HashMap<>();
+    // role (group name) -> resources (account, application, etc)
+    Multimap<Role, Resource.AccessControlled> acl = ArrayListMultimap.create();
 
     void add(Resource.AccessControlled resource) {
       resource
           .getPermissions()
-          .forEach((authorization, roles) ->
-                       roles.forEach(role ->
-                                         acl.computeIfAbsent(new Role(role),
-                                                             ignored -> ArrayListMultimap.create())
-                                            .put(authorization, resource)));
-
+          .allGroups()
+          .forEach(group -> acl.put(new Role(group), resource));
     }
 
     Collection<Resource> canAccess(Set<Role> roles) {
       return roles
           .stream()
           .filter(role -> acl.containsKey(role))
-          .map(acl::get)
-          .flatMap(multimap -> multimap.entries().stream())
-          .collect(Collectors.groupingBy(Map.Entry::getValue,
-                                         Collectors.mapping(Map.Entry::getKey,
-                                                            Collectors.toSet())))
-          .entrySet() // resource -> authorizations
-          .stream()
-          .map(entry -> entry.getKey().cloneWithoutAuthorizations().setAuthorizations(entry.getValue()))
-          .collect(Collectors.toList());
+          .flatMap(role -> acl.get(role).stream())
+          .collect(Collectors.toSet());
     }
   }
 }

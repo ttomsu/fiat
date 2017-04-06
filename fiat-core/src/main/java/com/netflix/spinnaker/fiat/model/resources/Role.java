@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(of = "name")
@@ -55,7 +56,7 @@ public class Role implements Resource, Viewable {
   }
 
   @JsonIgnore
-  public View getView() {
+  public View getView(Set<Role> ignored) {
     return new View(this);
   }
 

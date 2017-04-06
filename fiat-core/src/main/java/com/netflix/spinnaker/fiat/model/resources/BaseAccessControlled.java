@@ -17,15 +17,15 @@
 package com.netflix.spinnaker.fiat.model.resources;
 
 import com.netflix.spinnaker.fiat.model.Authorization;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
 @Slf4j
-abstract class BaseAccessControlled<R extends Resource.AccessControlled> implements Resource.AccessControlled<R> {
+abstract class BaseAccessControlled<R extends BaseAccessControlled> implements Resource.AccessControlled {
 
+  abstract R setPermissions(Permissions p);
+  
   /**
    * Legacy holdover where setting `requiredGroupMembership` implied both read and write
    * permissions.
@@ -36,7 +36,7 @@ abstract class BaseAccessControlled<R extends Resource.AccessControlled> impleme
       return (T) this;
     }
 
-    if (!getPermissions().isEmpty()) {
+    if (getPermissions() != null && !getPermissions().isEmpty()) {
       String msg = String.join(" ",
                                "`requiredGroupMembership` found on",
                                getResourceType().toString(),
@@ -52,10 +52,8 @@ abstract class BaseAccessControlled<R extends Resource.AccessControlled> impleme
                              getName(),
                              ". Please update to `permissions`.");
     log.warn(msg);
-    membership.stream()
-              .map(group -> group.trim().toLowerCase())
-              .forEach(group -> getPermissions().add(Authorization.READ, group)
-                                                .add(Authorization.WRITE, group));
+    this.setPermissions(new Permissions.Builder().add(Authorization.READ, membership)
+                                                 .add(Authorization.WRITE, membership).build());
     return (T) this;
   }
 }

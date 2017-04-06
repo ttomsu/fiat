@@ -26,7 +26,7 @@ public interface ResourceProvider<R extends Resource.AccessControlled> {
 
   Set<R> getAll() throws ProviderException;
 
-  Set<R> getAllRestricted(Collection<Role> roles) throws ProviderException;
+  Set<R> getAllRestricted(Set<Role> roles) throws ProviderException;
 
   Set<R> getAllUnrestricted() throws ProviderException;
 }

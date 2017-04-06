@@ -30,22 +30,22 @@ public interface Resource {
   /**
    * Represents Resources that have restrictions on permissions.
    */
-  interface AccessControlled<R extends Resource.AccessControlled> extends Resource, Authorizable {
+  interface AccessControlled extends Resource {
 
+    Permissions getPermissions();
+    
     /**
      * Grant the following Authorizations to this resource. This should not be done to shared
      * instances of this object. Instead, use the {@link} cloneWithoutAuthorizations} method to get
      * a new copy first.
      */
-    R setAuthorizations(Set<Authorization> authorizations);
+//    R setAuthorizations(Set<Authorization> authorizations);
 
     /**
      * @return Implementations should return a modified copy of the object, in order to prevent
      * inadvertent authorization leaks.
      */
-    R cloneWithoutAuthorizations();
-
-    Permissions.Mutable getPermissions();
+//    R cloneWithoutAuthorizations();
   }
 
   /**

@@ -30,7 +30,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Data
-public class UserPermission implements Viewable {
+public class UserPermission {
   private String id;
 
   private Set<Account> accounts = new HashSet<>();
@@ -92,7 +92,7 @@ public class UserPermission implements Viewable {
   @EqualsAndHashCode(callSuper = false)
   @NoArgsConstructor
   @SuppressWarnings("unchecked")
-  public static class View extends BaseView {
+  public static class View extends Viewable.BaseView {
     String name;
     Set<Account.View> accounts;
     Set<Application.View> applications;
@@ -102,9 +102,9 @@ public class UserPermission implements Viewable {
     public View(UserPermission permission) {
       this.name = permission.id;
 
-      Function<Set<? extends Viewable>, Set<? extends BaseView>> toViews = sourceSet ->
+      Function<Set<? extends Viewable>, Set<? extends Viewable.BaseView>> toViews = sourceSet ->
           sourceSet.stream()
-                   .map(Viewable::getView)
+                   .map(viewable -> viewable.getView(permission.getRoles()))
                    .collect(Collectors.toSet());
 
       this.accounts = (Set<Account.View>) toViews.apply(permission.getAccounts());
