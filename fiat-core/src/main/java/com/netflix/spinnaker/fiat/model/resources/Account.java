@@ -24,9 +24,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,14 +32,14 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 // Jackson seems to prefer the all args constructor when available, but passes null for the
-// Resource.Permissions object for 'legacy' objects with requiredGroupMembership.
+// Permissions object for 'legacy' objects with requiredGroupMembership.
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Account extends BaseAccessControlled<Account> implements Viewable {
   final ResourceType resourceType = ResourceType.ACCOUNT;
 
   private String name;
   private String cloudProvider;
-  private Resource.Permissions permissions = new Resource.Permissions();
+  private Permissions.Mutable permissions = new Permissions.Mutable();
   private Set<Authorization> authorizations = new HashSet<>();
 
   @Override

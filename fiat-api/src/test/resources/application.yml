@@ -1,0 +1,12 @@
+debug: true
+
+configPermissions:
+  permissions:
+    read:
+      - foo
+    write:
+      - bar
+
+#requiredGroupMembership:
+#- baz
+#- batman

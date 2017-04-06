@@ -17,6 +17,7 @@
 package com.netflix.spinnaker.fiat.providers
 
 import com.netflix.spinnaker.fiat.model.Authorization
+import com.netflix.spinnaker.fiat.model.resources.Permissions
 import com.netflix.spinnaker.fiat.model.resources.Resource
 import com.netflix.spinnaker.fiat.model.resources.ResourceType
 import com.netflix.spinnaker.fiat.model.resources.Role
@@ -41,11 +42,11 @@ class BaseProviderSpec extends Specification {
         .setName("noReqGroups")
     reqGroup1 = new TestResource()
         .setName("reqGroup1")
-        .setPermissions(new Resource.Permissions().add(R, "group1"))
+        .setPermissions(new Permissions.Mutable().add(R, "group1"))
     reqGroup1and2 = new TestResource()
         .setName("reqGroup1and2")
-        .setPermissions(new Resource.Permissions().add(R, "group1")
-                                                  .add(W, "group2"))
+        .setPermissions(new Permissions.Mutable().add(R, "group1")
+                                                 .add(W, "group2"))
   }
 
   def "should get all unrestricted"() {
@@ -144,7 +145,7 @@ class BaseProviderSpec extends Specification {
     final ResourceType resourceType = ResourceType.APPLICATION // Irrelevant for testing.
     String name
     Set<Authorization> authorizations = new HashSet<>()
-    Resource.Permissions permissions = new Resource.Permissions()
+    Permissions.Mutable permissions = new Permissions.Mutable()
 
     @Override
     TestResource cloneWithoutAuthorizations() {

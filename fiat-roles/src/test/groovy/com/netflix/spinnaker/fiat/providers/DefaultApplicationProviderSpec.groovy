@@ -18,7 +18,7 @@ package com.netflix.spinnaker.fiat.providers
 
 import com.netflix.spinnaker.fiat.model.Authorization
 import com.netflix.spinnaker.fiat.model.resources.Application
-import com.netflix.spinnaker.fiat.model.resources.Resource
+import com.netflix.spinnaker.fiat.model.resources.Permissions
 import com.netflix.spinnaker.fiat.providers.internal.ClouddriverService
 import com.netflix.spinnaker.fiat.providers.internal.Front50Service
 import org.apache.commons.collections4.CollectionUtils
@@ -37,7 +37,7 @@ class DefaultApplicationProviderSpec extends Specification {
       getAllApplicationPermissions() >> [
           new Application().setName("onlyKnownToFront50"),
           new Application().setName("app1")
-                           .setPermissions(new Resource.Permissions().add(Authorization.READ, "role")),
+                           .setPermissions(new Permissions.Mutable().add(Authorization.READ, "role")),
       ]
     }
     ClouddriverService clouddriverService = Mock(ClouddriverService) {

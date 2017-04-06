@@ -17,6 +17,8 @@
 package com.netflix.spinnaker.fiat.model.resources;
 
 import com.netflix.spinnaker.fiat.model.Authorization;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -35,13 +37,21 @@ abstract class BaseAccessControlled<R extends Resource.AccessControlled> impleme
     }
 
     if (!getPermissions().isEmpty()) {
-      log.warn("`requiredGroupMembership` found on resource `" + getName() +
-                   "` and ignored because `permissions` are present");
+      String msg = String.join(" ",
+                               "`requiredGroupMembership` found on",
+                               getResourceType().toString(),
+                               getName(),
+                               "and ignored because `permissions` are present");
+      log.warn(msg);
       return (T) this;
     }
 
-    log.warn("Deprecated `requiredGroupMembership` found on resource `" + getName() + "`. " +
-                 "Please update to `permissions`.");
+    String msg = String.join(" ",
+                             "Deprecated `requiredGroupMembership` found on",
+                             getResourceType().toString(),
+                             getName(),
+                             ". Please update to `permissions`.");
+    log.warn(msg);
     membership.stream()
               .map(group -> group.trim().toLowerCase())
               .forEach(group -> getPermissions().add(Authorization.READ, group)

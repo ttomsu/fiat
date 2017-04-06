@@ -28,7 +28,6 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -43,7 +42,7 @@ public class ServiceAccount extends BaseAccessControlled<ServiceAccount> impleme
 
   private String name;
   private List<String> memberOf = new ArrayList<>();
-  private Resource.Permissions permissions = new Resource.Permissions();
+  private Permissions.Mutable permissions = new Permissions.Mutable();
   private Set<Authorization> authorizations = new HashSet<>();
 
   public UserPermission toUserPermission() {

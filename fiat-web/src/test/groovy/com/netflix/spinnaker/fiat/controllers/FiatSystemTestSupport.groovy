@@ -21,7 +21,7 @@ import com.netflix.spinnaker.fiat.model.Authorization
 import com.netflix.spinnaker.fiat.model.UserPermission
 import com.netflix.spinnaker.fiat.model.resources.Account
 import com.netflix.spinnaker.fiat.model.resources.Application
-import com.netflix.spinnaker.fiat.model.resources.Resource
+import com.netflix.spinnaker.fiat.model.resources.Permissions
 import com.netflix.spinnaker.fiat.model.resources.Role
 import com.netflix.spinnaker.fiat.model.resources.ServiceAccount
 
@@ -37,14 +37,14 @@ class FiatSystemTestSupport {
                                                        .setAuthorizations([R, W] as Set)
 
   Application restrictedApp = new Application().setName("restrictedApp")
-                                               .setPermissions(new Resource.Permissions().add(R, roleA.name))
+                                               .setPermissions(new Permissions.Mutable().add(R, roleA.name))
 
   Account unrestrictedAccount = new Account().setName("unrestrictedAcct")
   Account unrestrictedAccountWithAuth = unrestrictedAccount.cloneWithoutAuthorizations()
                                                            .setAuthorizations([R, W] as Set)
 
   Account restrictedAccount = new Account().setName("restrictedAcct")
-                                           .setPermissions(new Resource.Permissions().add(R, roleB.name))
+                                           .setPermissions(new Permissions.Mutable().add(R, roleB.name))
 
   ServiceAccount serviceAccount = new ServiceAccount().setName("svcAcct@group.com")
   Role roleServiceAccount = new Role(serviceAccount.requiredGroupMembership.first())
