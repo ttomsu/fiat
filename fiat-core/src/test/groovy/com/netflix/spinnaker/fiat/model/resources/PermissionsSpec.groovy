@@ -19,14 +19,25 @@ package com.netflix.spinnaker.fiat.model.resources
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.netflix.spinnaker.fiat.model.Authorization
-import com.netflix.spinnaker.fiat.model.resources.Permissions
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.test.ConfigFileApplicationContextInitializer
+import org.springframework.boot.test.SpringApplicationConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.TestPropertySource
 import spock.lang.Specification
 
+@ContextConfiguration(classes = TestConfig, initializers = ConfigFileApplicationContextInitializer)
 class PermissionsSpec extends Specification {
 
   private static final Authorization R = Authorization.READ
   private static final Authorization W = Authorization.WRITE
 
+  @Autowired
+  TestConfigProps testConfigProps
 
   ObjectMapper mapper = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true)
 
@@ -61,6 +72,21 @@ class PermissionsSpec extends Specification {
     permissionJson ==  mapper.writeValueAsString(b.build())
   }
 
+  def "should trim and lower"() {
+    when:
+    Permissions.Builder b = new Permissions.Builder()
+    b.set([(R): ["FOO"]])
+
+    then:
+    b.build().get(R) == ["foo"]
+
+    when:
+    b.add(W, "bAr          ")
+
+    then:
+    b.build().get(W) == ["bar"]
+  }
+
   def "test immutability"() {
     setup:
     Permissions.Builder b = new Permissions.Builder().add(R, "foo").add(W, "bar")
@@ -69,7 +95,7 @@ class PermissionsSpec extends Specification {
     b.add(R, "baz")
 
     then:
-    b.permissions.get(R).size() == 2
+    b.get(R).size() == 2
 
     when:
     Permissions im = b.build()
@@ -77,5 +103,28 @@ class PermissionsSpec extends Specification {
 
     then:
     thrown UnsupportedOperationException
+  }
+
+  def "test config props deserialization"() {
+    expect: "Parsed from test/resources/config/application.yml"
+    testConfigProps != null
+    testConfigProps.permissions != null
+
+    when:
+    Permissions p = testConfigProps.permissions.build()
+
+    then:
+    p.get(R) == ["foo"]
+    p.get(W) == ["bar"]
+  }
+
+  @Configuration
+  @EnableConfigurationProperties(TestConfigProps)
+  static class TestConfig {
+  }
+
+  @ConfigurationProperties("testRoot")
+  static class TestConfigProps {
+    Permissions.Builder permissions
   }
 }

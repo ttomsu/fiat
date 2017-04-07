@@ -24,7 +24,6 @@ import com.netflix.spinnaker.fiat.model.resources.Role
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.builder.Builder
 import groovy.transform.builder.SimpleStrategy
-import org.apache.commons.collections4.CollectionUtils
 import spock.lang.Specification
 import spock.lang.Subject
 
@@ -42,11 +41,12 @@ class BaseProviderSpec extends Specification {
         .setName("noReqGroups")
     reqGroup1 = new TestResource()
         .setName("reqGroup1")
-        .setPermissions(new Permissions.Builder().add(R, "group1"))
+        .setPermissions(new Permissions.Builder().add(R, "group1").build())
     reqGroup1and2 = new TestResource()
         .setName("reqGroup1and2")
         .setPermissions(new Permissions.Builder().add(R, "group1")
-                                                 .add(W, "group2"))
+                                                 .add(W, "group2")
+                                                 .build())
   }
 
   def "should get all unrestricted"() {
@@ -59,7 +59,7 @@ class BaseProviderSpec extends Specification {
 
     then:
     result.size() == 1
-    def expected = noReqGroups.cloneWithoutAuthorizations().setAuthorizations([R, W] as Set)
+    def expected = noReqGroups
     result.first() == expected
 
     when:
@@ -76,36 +76,33 @@ class BaseProviderSpec extends Specification {
 
     when:
     provider.all = [noReqGroups]
-    def result = provider.getAllRestricted([new Role("group1")])
+    def result = provider.getAllRestricted([new Role("group1")] as Set)
 
     then:
     result.isEmpty()
 
     when:
     provider.all = [reqGroup1]
-    result = provider.getAllRestricted([new Role("group1")])
+    result = provider.getAllRestricted([new Role("group1")] as Set)
 
     then:
     result.size() == 1
-    CollectionUtils.disjunction(result.first().authorizations, [R]).isEmpty()
+    result.first() == reqGroup1
 
     when:
     provider.all = [reqGroup1and2]
-    result = provider.getAllRestricted([new Role("group1")])
+    result = provider.getAllRestricted([new Role("group1")] as Set)
 
     then:
     result.size() == 1
-    CollectionUtils.disjunction(result.first().authorizations, [R]).isEmpty()
-    result.first().authorizations.clear()
+    result.first() == reqGroup1and2
 
     when: "use additional groups that grants additional authorizations."
-    result = provider.getAllRestricted([new Role("group1"), new Role("group2")])
+    result = provider.getAllRestricted([new Role("group1"), new Role("group2")] as Set)
 
     then:
     result.size() == 1
-    CollectionUtils.disjunction(result.first().authorizations,
-                                [R, W]).isEmpty()
-    result.first().authorizations.clear()
+    result.first() == reqGroup1and2
 
     when:
     provider.getAllRestricted(null)
@@ -141,15 +138,9 @@ class BaseProviderSpec extends Specification {
 
   @Builder(builderStrategy = SimpleStrategy, prefix = "set")
   @EqualsAndHashCode
-  class TestResource implements Resource.AccessControlled<TestResource> {
+  class TestResource implements Resource.AccessControlled {
     final ResourceType resourceType = ResourceType.APPLICATION // Irrelevant for testing.
     String name
-    Set<Authorization> authorizations = new HashSet<>()
-    Permissions.Builder permissions = new Permissions.Builder()
-
-    @Override
-    TestResource cloneWithoutAuthorizations() {
-      return new TestResource(name: name, permissions: permissions)
-    }
+    Permissions permissions = Permissions.EMPTY
   }
 }

@@ -19,7 +19,9 @@ package com.netflix.spinnaker.fiat.shared
 import com.netflix.spinnaker.fiat.model.Authorization
 import com.netflix.spinnaker.fiat.model.UserPermission
 import com.netflix.spinnaker.fiat.model.resources.Application
+import com.netflix.spinnaker.fiat.model.resources.Permissions
 import com.netflix.spinnaker.fiat.model.resources.ResourceType
+import com.netflix.spinnaker.fiat.model.resources.Role
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken
 import spock.lang.Specification
@@ -59,23 +61,15 @@ class FiatPermissionEvaluatorSpec extends Specification {
                                      authorization)
 
     then:
-    1 * fiatService.getUserPermission("testUser") >> new UserPermission.View(
-        new UserPermission(
-            applications: [new Application(name: "abc", authorizations: [/* Missing auth */])]
-        ))
-    !result
-
-    when:
-    result = evaluator.hasPermission(authentication,
-                                     resource,
-                                     resourceType.name(),
-                                     authorization)
-
-    then:
-    1 * fiatService.getUserPermission("testUser") >> new UserPermission.View(
-        new UserPermission(
-            applications: [new Application(name: "abc", authorizations: [Authorization.READ])]
-        ))
+    1 * fiatService.getUserPermission("testUser") >> new UserPermission(
+            applications: [
+                new Application(name: "abc",
+                                permissions: Permissions.factory([
+                                    (Authorization.READ): ["testRole"]
+                                ]))
+            ],
+            roles: [new Role("testRole")]
+        ).getView()
     result
 
     where:

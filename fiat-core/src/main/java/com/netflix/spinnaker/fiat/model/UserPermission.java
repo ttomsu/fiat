@@ -17,7 +17,12 @@
 package com.netflix.spinnaker.fiat.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.netflix.spinnaker.fiat.model.resources.*;
+import com.netflix.spinnaker.fiat.model.resources.Account;
+import com.netflix.spinnaker.fiat.model.resources.Application;
+import com.netflix.spinnaker.fiat.model.resources.Resource;
+import com.netflix.spinnaker.fiat.model.resources.Role;
+import com.netflix.spinnaker.fiat.model.resources.ServiceAccount;
+import com.netflix.spinnaker.fiat.model.resources.Viewable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -25,6 +30,7 @@ import lombok.NoArgsConstructor;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -33,10 +39,10 @@ import java.util.stream.Collectors;
 public class UserPermission {
   private String id;
 
-  private Set<Account> accounts = new HashSet<>();
-  private Set<Application> applications = new HashSet<>();
-  private Set<ServiceAccount> serviceAccounts = new HashSet<>();
-  private Set<Role> roles = new HashSet<>();
+  private Set<Account> accounts = new LinkedHashSet<>();
+  private Set<Application> applications = new LinkedHashSet<>();
+  private Set<ServiceAccount> serviceAccounts = new LinkedHashSet<>();
+  private Set<Role> roles = new LinkedHashSet<>();
 
   public void addResource(Resource resource) {
     addResources(Collections.singleton(resource));

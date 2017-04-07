@@ -53,8 +53,8 @@ class ResourceSpec extends Specification {
 
   def "should compute authorizations correctly"() {
     setup:
-    def p = new Permissions.Builder()
-    p.add(Authorization.READ, "role1")
+    def b = new Permissions.Builder().add(Authorization.READ, "role1")
+    def p = b.build()
 
     expect:
     p.getAuthorizations([]).isEmpty()
@@ -62,7 +62,8 @@ class ResourceSpec extends Specification {
     p.getAuthorizations(["role1", "role2"]) == [Authorization.READ] as Set
 
     when:
-    p.add(Authorization.WRITE, "role2")
+    b.add(Authorization.WRITE, "role2")
+    p = b.build()
 
     then:
     p.getAuthorizations(["role1", "role2"]) == [Authorization.READ, Authorization.WRITE] as Set
@@ -70,13 +71,15 @@ class ResourceSpec extends Specification {
 
   def "should detect when restricted"() {
     setup:
-    def p = new Permissions.Builder()
+    def b = new Permissions.Builder()
+    def p = b.build()
 
     expect:
     !p.isRestricted()
 
     when:
-    p.add(Authorization.READ, "role1")
+    b.add(Authorization.READ, "role1")
+    p = b.build()
 
     then:
     p.isRestricted()

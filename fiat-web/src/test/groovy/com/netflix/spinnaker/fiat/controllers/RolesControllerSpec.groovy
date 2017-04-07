@@ -92,8 +92,7 @@ class RolesControllerSpec extends Specification {
 
     when:
     mockMvc.perform(post("/roles/roleAUser@group.com")).andExpect(status().isOk())
-    def restrictedAppWithAuth = restrictedApp.cloneWithoutAuthorizations()
-                                             .setAuthorizations([Authorization.READ] as Set)
+    def restrictedAppWithAuth = restrictedApp
     expected = new UserPermission().setId("roleAUser@group.com")
                                    .setRoles([roleA] as Set)
                                    .setApplications([restrictedAppWithAuth] as Set)
@@ -103,8 +102,7 @@ class RolesControllerSpec extends Specification {
 
     when:
     mockMvc.perform(put("/roles/roleBUser@group.com").content('["roleB"]')).andExpect(status().isOk())
-    def restrictedAccountWithAuth = restrictedAccount.cloneWithoutAuthorizations()
-                                                     .setAuthorizations([Authorization.READ] as Set)
+    def restrictedAccountWithAuth = restrictedAccount
     expected = new UserPermission().setId("roleBUser@group.com")
                                    .setRoles([roleB] as Set)
                                    .setAccounts([restrictedAccountWithAuth] as Set)

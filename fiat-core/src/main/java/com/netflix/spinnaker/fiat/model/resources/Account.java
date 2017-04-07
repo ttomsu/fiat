@@ -27,6 +27,7 @@ import java.util.Set;
 
 @Slf4j
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class Account extends BaseAccessControlled implements Viewable {
   final ResourceType resourceType = ResourceType.ACCOUNT;

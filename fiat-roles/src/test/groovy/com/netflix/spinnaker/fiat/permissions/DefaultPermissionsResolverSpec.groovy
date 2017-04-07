@@ -43,9 +43,6 @@ class DefaultPermissionsResolverSpec extends Specification {
   Account noReqGroupsAcct = new Account().setName("noReqGroups")
 
   @Shared
-  Account noReqGroupsAcctWithAuth = noReqGroupsAcct.cloneWithoutAuthorizations()
-                                                   .setAuthorizations([R, W] as Set)
-  @Shared
   Account reqGroup1Acct = new Account().setName("reqGroup1")
                                        .setRequiredGroupMembership(["group1"])
   @Shared
@@ -96,7 +93,7 @@ class DefaultPermissionsResolverSpec extends Specification {
 
     then:
     def expected = new UserPermission().setId("__unrestricted_user__")
-                                       .setAccounts([noReqGroupsAcctWithAuth] as Set)
+                                       .setAccounts([noReqGroupsAcct] as Set)
     result == expected
   }
 
@@ -132,9 +129,7 @@ class DefaultPermissionsResolverSpec extends Specification {
 
     then:
     1 * userRolesProvider.loadRoles(testUserId) >> [role2]
-    def g1and2WithAuth = reqGroup1and2Acct.cloneWithoutAuthorizations()
-                                          .setAuthorizations([R, W] as Set)
-    expected.setAccounts([g1and2WithAuth] as Set)
+    expected.setAccounts([reqGroup1and2Acct] as Set)
             .setServiceAccounts([group2SvcAcct] as Set)
             .setRoles([role2] as Set)
     result == expected
@@ -144,9 +139,7 @@ class DefaultPermissionsResolverSpec extends Specification {
 
     then:
     1 * userRolesProvider.loadRoles(testUserId) >> [role2]
-    def g1WithAuth = reqGroup1Acct.cloneWithoutAuthorizations()
-                                      .setAuthorizations([R, W] as Set)
-    expected.setAccounts([g1WithAuth, g1and2WithAuth] as Set)
+    expected.setAccounts([reqGroup1Acct, reqGroup1and2Acct] as Set)
             .setServiceAccounts([group1SvcAcct, group2SvcAcct] as Set)
             .setRoles([role1, role2] as Set)
     result == expected
@@ -182,14 +175,12 @@ class DefaultPermissionsResolverSpec extends Specification {
     def result = resolver.resolve([extUser1, extUser2])
 
     then:
-    def reqGroup1AcctWithAuth = reqGroup1Acct.setAuthorizations([R, W])
-    def reqGroup1and2AcctWithAuth = reqGroup1and2Acct.setAuthorizations([R, W])
     def user1 = new UserPermission().setId("user1")
-                                    .setAccounts([reqGroup1AcctWithAuth, reqGroup1and2AcctWithAuth] as Set)
+                                    .setAccounts([reqGroup1Acct, reqGroup1and2Acct] as Set)
                                     .setServiceAccounts([group1SvcAcct] as Set)
                                     .setRoles([role1] as Set)
     def user2 = new UserPermission().setId("user2")
-                                    .setAccounts([reqGroup1and2AcctWithAuth] as Set)
+                                    .setAccounts([reqGroup1and2Acct] as Set)
                                     .setServiceAccounts([group2SvcAcct] as Set)
                                     .setRoles([role2] as Set)
     result.remove("user1") == user1
@@ -206,7 +197,7 @@ class DefaultPermissionsResolverSpec extends Specification {
 
     then:
     def user3 = new UserPermission().setId("user3")
-                                    .setAccounts([reqGroup1AcctWithAuth, reqGroup1and2AcctWithAuth] as Set)
+                                    .setAccounts([reqGroup1Acct, reqGroup1and2Acct] as Set)
                                     .setServiceAccounts([group1SvcAcct] as Set)
                                     .setRoles([role1, extRole] as Set)
     result == ["user3": user3]

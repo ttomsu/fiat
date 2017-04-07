@@ -33,25 +33,23 @@ class FiatSystemTestSupport {
   Role roleB = new Role("roleB").setSource(Role.Source.EXTERNAL)
 
   Application unrestrictedApp = new Application().setName("unrestrictedApp")
-  Application unrestrictedAppWithAuth = unrestrictedApp.cloneWithoutAuthorizations()
-                                                       .setAuthorizations([R, W] as Set)
 
   Application restrictedApp = new Application().setName("restrictedApp")
-                                               .setPermissions(new Permissions.Builder().add(R, roleA.name))
+                                               .setPermissions(new Permissions.Builder().add(R, roleA.name)
+                                                                                        .build())
 
   Account unrestrictedAccount = new Account().setName("unrestrictedAcct")
-  Account unrestrictedAccountWithAuth = unrestrictedAccount.cloneWithoutAuthorizations()
-                                                           .setAuthorizations([R, W] as Set)
 
   Account restrictedAccount = new Account().setName("restrictedAcct")
-                                           .setPermissions(new Permissions.Builder().add(R, roleB.name))
+                                           .setPermissions(new Permissions.Builder().add(R, roleB.name)
+                                                                                    .build())
 
   ServiceAccount serviceAccount = new ServiceAccount().setName("svcAcct@group.com")
   Role roleServiceAccount = new Role(serviceAccount.requiredGroupMembership.first())
 
   UserPermission unrestrictedUser = new UserPermission().setId(UnrestrictedResourceConfig.UNRESTRICTED_USERNAME)
-                                                        .setAccounts([unrestrictedAccountWithAuth] as Set)
-                                                        .setApplications([unrestrictedAppWithAuth] as Set)
+                                                        .setAccounts([unrestrictedAccount] as Set)
+                                                        .setApplications([unrestrictedApp] as Set)
 
   UserPermission roleAUser = new UserPermission().setId("roleAUser")
                                                  .setRoles([roleA] as Set)
